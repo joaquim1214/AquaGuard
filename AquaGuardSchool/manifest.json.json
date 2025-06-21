@@ -2,7 +2,7 @@
   "name": "AquaGuard School",
   "short_name": "AquaGuard",
   "description": "Tu compañero para el ahorro de agua en Innova Schools.",
-  "start_url": "./index.html",
+  "start_url": "/AquaGuard/",  <!-- RUTA AJUSTADA: Asegura que el manifest sepa la subcarpeta -->
   "display": "standalone",
   "background_color": "#f3f4f6",
   "theme_color": "#2563EB",
