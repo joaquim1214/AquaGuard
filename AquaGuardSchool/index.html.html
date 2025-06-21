@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AquaGuard School: Ahorro de Agua</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles to ensure Inter font is applied */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #f3f4f6; /* Light gray background for the app */
+        }
+        /* Style for the active tab indicator */
+        .tab-button.active {
+            color: #1DB954; /* Spotify Green */
+        }
+        /* Basic styling for SVG icons */
+        .tab-button svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px; /* Space between icon and text */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        /* Loading spinner */
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <div class="relative flex flex-col flex-grow">
+        <!-- Header Section -->
+        <header class="bg-gradient-to-r from-blue-500 to-cyan-500 p-4 text-white shadow-md rounded-b-lg">
+            <h1 class="text-3xl font-bold text-center">AquaGuard School</h1>
+            <p class="text-center text-sm mt-1">Tu compañero para un uso consciente del agua en Innova Schools</p>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow p-4 pb-20 overflow-y-auto">
+            <!-- Inicio / Resumen Section -->
+            <section id="inicio-content" class="tab-content bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <!-- Icono de Casa -->
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                    Resumen del Colegio
+                </h2>
+                <div class="text-gray-700">
+                    <p class="mb-4">Un vistazo rápido al estado del agua en Innova Schools.</p>
+                    <div class="bg-green-100 p-4 rounded-md border border-green-300 mb-4">
+                        <p class="text-lg font-medium text-green-800 flex items-center">
+                            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Estado General: <span class="font-bold ml-1">Todo Normal</span>
+                        </p>
+                        <p class="text-sm text-green-700 mt-1">¡Gracias por tu colaboración para cuidar el agua!</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-md border border-blue-200 mb-4">
+                        <p class="text-lg font-medium text-blue-700 mb-2">Consumo de Hoy (Simulado - ESP32):</p>
+                        <p class="text-3xl font-bold text-blue-900">XXX Litros</p>
+                        <p class="text-sm text-blue-600 mt-1">Dato actualizado a las 11 PM por tu sistema.</p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-md border border-orange-200">
+                        <p class="text-lg font-medium text-orange-700 mb-2">Última Alerta:</p>
+                        <p class="text-md font-bold text-orange-800">No hay alertas recientes.</p>
+                        <p class="text-sm text-orange-600 mt-1">Si detectas algo, repórtalo en la sección "Reportar".</p>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Mensaje Inspirador del Día ✨</h3>
+                        <div id="ai-daily-message" class="p-3 bg-purple-50 text-purple-800 rounded-md border border-purple-200 min-h-[50px] flex items-center justify-center text-center">
+                            Pulsa el botón para generar un mensaje motivador.
+                        </div>
+                        <button id="generate-ai-daily-message" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 mt-3 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
+                            <span id="daily-message-spinner" class="hidden loading-spinner mr-2"></span>
+                            Generar Mensaje Inspirador ✨
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Estadísticas / Datos Section -->
+            <section id="estadisticas-content" class="tab-content hidden bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <!-- Icono de gráfico de barras -->
+                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                    Estadísticas Detalladas
+                </h2>
+                <div class="text-gray-700">
+                    <p class="mb-4">Análisis del consumo de agua en Innova Schools, monitoreado por tu sensor YF-201 y ESP-32.</p>
+                    <div class="bg-blue-50 p-4 rounded-md border border-blue-200">
+                        <p class="text-lg font-medium text-blue-700 mb-2">Consumo Promedio Diario (Últimos 7 días):</p>
+                        <p class="text-3xl font-bold text-blue-900">145 Litros</p>
+                        <p class="text-sm text-blue-600 mt-1">¡Mantengamos el promedio bajo!</p>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Gráfico de Consumo Semanal</h3>
+                        <div class="bg-gray-100 h-48 rounded-md flex items-center justify-center text-gray-500 text-sm">
+                            <!-- Aquí iría un gráfico interactivo con datos del sensor -->
+                            [Gráfico de barras: Consumo Lunes-Domingo]
+                        </div>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Historial de Alertas de Fugas</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>05/06/2025: Fuga en grifo, baño 2do piso (Solucionado)</li>
+                            <li>01/06/2025: Consumo excesivo nocturno (Investigando)</li>
+                            <li>28/05/2025: Inodoro goteando, baño de primaria (Solucionado)</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Ahorro Estimado</h3>
+                        <p class="text-lg text-gray-600">Desde el inicio del proyecto, se estima un ahorro de <span class="font-bold text-green-700">2,500 litros</span> de agua.</p>
+                        <p class="text-sm text-gray-500 mt-1">¡Gracias a tu monitoreo con ESP32 y el sensor YF-201!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Consejos / Aprende Section -->
+            <section id="consejos-content" class="tab-content hidden bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <!-- Icono de bombilla -->
+                    <svg class="w-6 h-6 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 11a4 4 0 11-8 0H5a1 1 0 00-1 1v2a1 1 0 001 1h10a1 1 0 001-1v-2a1 1 0 00-1-1h-1zm-1-7a1 1 0 10-2 0v2a1 1 0 102 0V6z" clip-rule="evenodd"></path></svg>
+                    Consejos y Aprendizaje
+                </h2>
+                <div class="text-gray-700">
+                    <p class="mb-4">Descubre cómo ser un guardián del agua en Innova Schools y en casa.</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 text-xl">&#x2022;</span>
+                            <div>
+                                <h3 class="font-medium text-lg text-gray-800">Cierra bien el caño</h3>
+                                <p class="text-gray-600">Después de lavarte las manos, asegúrate de que el grifo esté completamente cerrado. ¡Ni una gota debe caer!</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 text-xl">&#x2022;</span>
+                            <div>
+                                <h3 class="font-medium text-lg text-gray-800">Usa el inodoro con conciencia</h3>
+                                <p class="text-gray-600">No uses el inodoro como papelera. Cada descarga gasta litros de agua.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 text-xl">&#x2022;</span>
+                            <div>
+                                <h3 class="font-medium text-lg text-gray-800">Reporta cualquier fuga</h3>
+                                <p class="text-gray-600">Si ves un grifo goteando o un inodoro averiado, repórtalo inmediatamente usando la sección "Reportar".</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 text-xl">&#x2022;</span>
+                            <div>
+                                <h3 class="font-medium text-lg text-gray-800">¡Sé un ejemplo!</h3>
+                                <p class="text-gray-600">Comparte estos consejos con tus compañeros y amigos. Juntos podemos hacer la diferencia.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Consejo ✨ Avanzado del Día</h3>
+                        <div id="ai-consejo-output" class="p-3 bg-indigo-50 text-indigo-800 rounded-md border border-indigo-200 min-h-[50px] flex items-center justify-center text-center">
+                            Pulsa el botón para generar un consejo personalizado.
+                        </div>
+                        <button id="generate-ai-consejo" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 mt-3 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
+                            <span id="consejo-spinner" class="hidden loading-spinner mr-2"></span>
+                            Generar Consejo ✨ Avanzado
+                        </button>
+                    </div>
+
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Preguntas Frecuentes (FAQ)</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>¿Cómo funciona el sistema de monitoreo de agua?</li>
+                            <li>¿Por qué es importante ahorrar agua en el colegio?</li>
+                            <li>¿Qué puedo hacer si veo una fuga fuera del baño?</li>
+                        </ul>
+                    </div>
+
+                    <!-- Nueva sección: Pregunta a la IA -->
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Pregunta a la IA ✨</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label for="ai-question-input" class="block text-sm font-medium text-gray-700 mb-1">Haz una pregunta sobre el agua o AquaGuard:</label>
+                                <textarea id="ai-question-input" rows="3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="Ej: ¿Cuánta agua se gasta al tirar de la cadena?"></textarea>
+                            </div>
+                            <button id="ask-ai-button" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
+                                <span id="ai-question-spinner" class="hidden loading-spinner mr-2"></span>
+                                Preguntar a la IA ✨
+                            </button>
+                            <div id="ai-answer-output" class="p-3 bg-gray-50 text-gray-800 rounded-md border border-gray-200 min-h-[50px] flex items-center justify-center text-center">
+                                La respuesta de la IA aparecerá aquí.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reportar Section -->
+            <section id="reportar-content" class="tab-content hidden bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <!-- Icono de alerta -->
+                    <svg class="w-6 h-6 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM10 11a1 1 0 100-2 1 1 0 000 2zm1-4a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd"></path></svg>
+                    Reportar Problema de Agua
+                </h2>
+                <div class="text-gray-700">
+                    <p class="mb-4">Si ves desperdicio o fugas de agua en Innova Schools, repórtalo aquí.</p>
+                    <form id="report-form" class="space-y-4">
+                        <div>
+                            <label for="problem-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Problema:</label>
+                            <select id="problem-type" name="problem-type" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="">Selecciona un tipo</option>
+                                <option value="fuga-grifo">Fuga de grifo</option>
+                                <option value="inodoro-averiado">Inodoro averiado (no para/no descarga)</option>
+                                <option value="tuberia-rota">Tubería rota</option>
+                                <option value="consumo-excesivo">Uso excesivo (ej. dejar el caño abierto)</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Descripción del problema:</label>
+                            <textarea id="description" name="description" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Ej: Grifo goteando en el lavadero del baño de 3er grado, inodoro que no para de botar agua en el baño de profesores..."></textarea>
+                        </div>
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">Ubicación:</label>
+                            <input type="text" id="location" name="location" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Ej: Baño de niños (primer piso), cerca de la biblioteca, patio de juegos..."></input>
+                        </div>
+                        <div>
+                            <label for="image-upload" class="block text-sm font-medium text-gray-700 mb-1">Adjuntar foto (opcional):</label>
+                            <input type="file" id="image-upload" name="image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
+                                file:mr-4 file:py-2 file:px-4
+                                file:rounded-full file:border-0
+                                file:text-sm file:font-semibold
+                                file:bg-blue-50 file:text-blue-700
+                                hover:file:bg-blue-100"
+                            />
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                            Reportar
+                        </button>
+                    </form>
+                    <div id="report-message" class="mt-4 p-3 bg-green-100 text-green-700 rounded-md border border-green-200 hidden">
+                        ¡Gracias por tu reporte! Hemos recibido la información.
+                        <div id="ai-impact-output" class="mt-2 text-sm text-green-800 font-medium">
+                            <span id="impact-spinner" class="hidden loading-spinner mr-2"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Historial de Mis Reportes</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>06/06/2025: Fuga de grifo, baño de 3er grado - <span class="font-semibold text-orange-600">En Progreso</span></li>
+                            <li>03/06/2025: Inodoro averiado, baño de maestros - <span class="font-semibold text-green-600">Solucionado</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Competencia / Ahorro Section -->
+            <section id="competencia-content" class="tab-content hidden bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <!-- Icono de Trofeo -->
+                    <svg class="w-6 h-6 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                    Competencia de Ahorro
+                </h2>
+                <div class="text-gray-700">
+                    <p class="mb-4">¡Compite con otras clases y ayuda a Innova Schools a ser líder en ahorro de agua!</p>
+                    <div class="mt-6">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Marcador Global (Ranking de Clases)</h3>
+                        <table class="min-w-full bg-white rounded-md shadow-sm">
+                            <thead>
+                                <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                                    <th class="py-3 px-6 text-left rounded-tl-lg">Posición</th>
+                                    <th class="py-3 px-6 text-left">Clase</th>
+                                    <th class="py-3 px-6 text-right rounded-tr-lg">Ahorro %</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-600 text-sm font-light">
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap"><span class="font-bold">1º</span></td>
+                                    <td class="py-3 px-6 text-left">6to Grado A</td>
+                                    <td class="py-3 px-6 text-right text-green-600 font-bold">15%</td>
+                                </tr>
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap"><span class="font-bold">2º</span></td>
+                                    <td class="py-3 px-6 text-left">5to Grado B</td>
+                                    <td class="py-3 px-6 text-right text-green-600 font-bold">12%</td>
+                                </tr>
+                                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                                    <td class="py-3 px-6 text-left whitespace-nowrap"><span class="font-bold">3º</span></td>
+                                    <td class="py-3 px-6 text-left">7mo Grado C</td>
+                                    <td class="py-3 px-6 text-right text-green-600 font-bold">10%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Mi Progreso (Clase: 6to Grado A)</h3>
+                        <p class="text-lg text-gray-600">¡Tu clase ha reducido el consumo de agua en un <span class="font-bold text-green-700">15%</span> esta semana!</p>
+                        <p class="text-sm text-gray-500 mt-1">¡Sigan así, son el ejemplo del colegio!</p>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Desafíos Actuales</h3>
+                        <ul class="list-disc list-inside text-gray-600">
+                            <li>Desafío Semanal: Lograr que ningún caño gotee por más de 24 horas.</li>
+                            <li>Desafío Mensual: Reducir el consumo de agua del baño principal en un 5% extra.</li>
+                        </ul>
+                    </div>
+                    <div class="mt-6 border-t border-gray-200 pt-4">
+                        <h3 class="text-xl font-medium text-gray-700 mb-3">Logros Desbloqueados</h3>
+                        <div class="flex flex-wrap gap-4 mt-2">
+                            <span class="bg-yellow-400 text-yellow-900 text-sm font-semibold px-3 py-1 rounded-full shadow-md">💧 Guardian Nivel 1</span>
+                            <span class="bg-gray-400 text-gray-900 text-sm font-semibold px-3 py-1 rounded-full shadow-md">🏅 Clase Ecológica</span>
+                            <span class="bg-blue-400 text-blue-900 text-sm font-semibold px-3 py-1 rounded-full shadow-md">🌊 Héroe del Agua</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Bottom Navigation Bar (Spotify-like) -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white flex justify-around items-center h-16 shadow-lg rounded-t-lg z-10">
+            <!-- Inicio Tab Button -->
+            <button id="inicio-tab" class="tab-button flex flex-col items-center justify-center p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700 active">
+                <!-- Icono de Casa -->
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                <span class="text-xs mt-1">Inicio</span>
+            </button>
+
+            <!-- Estadísticas Tab Button -->
+            <button id="estadisticas-tab" class="tab-button flex flex-col items-center justify-center p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700">
+                <!-- Icono de Estadísticas -->
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 3a1 1 0 011-1h2a1 1 0 011 1v13a1 1 0 01-1 1h-2a1 1 0 01-1-1V3z"></path></svg>
+                <span class="text-xs mt-1">Estadísticas</span>
+            </button>
+
+            <!-- Consejos Tab Button -->
+            <button id="consejos-tab" class="tab-button flex flex-col items-center justify-center p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700">
+                <!-- Icono de Bombilla -->
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6c0 1.954.675 3.731 1.815 5.127l.951.951A10.027 10.027 0 0010 18a10.027 10.027 0 003.234-.582l.95-.951A6 6 0 0016 8a6 6 0 00-6-6zm0 16a8 8 0 01-4.717-1.579l-.162-.119A8 8 0 012 8a8 8 0 018-8 8 8 0 018 8 8 8 0 01-3.121 6.283l-.119.162A8 8 0 0110 18zM10 4a2 2 0 100 4 2 2 0 000-4zm-4 4a2 2 0 104 0V5a2 2 0 10-4 0v3z"></path></svg>
+                <span class="text-xs mt-1">Consejos</span>
+            </button>
+
+            <!-- Reportar Tab Button -->
+            <button id="reportar-tab" class="tab-button flex flex-col items-center justify-center p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700">
+                <!-- Icono de Alerta/Lupa -->
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs mt-1">Reportar</span>
+            </button>
+
+            <!-- Competencia Tab Button -->
+            <button id="competencia-tab" class="tab-button flex flex-col items-center justify-center p-2 rounded-lg transition-colors duration-200 hover:bg-gray-700">
+                <!-- Icono de Trofeo -->
+                <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs mt-1">Competencia</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        // Get references to tab buttons and content sections
+        const inicioTab = document.getElementById('inicio-tab');
+        const estadisticasTab = document.getElementById('estadisticas-tab');
+        const consejosTab = document.getElementById('consejos-tab');
+        const reportarTab = document.getElementById('reportar-tab');
+        const competenciaTab = document.getElementById('competencia-tab'); // New tab
+
+        const inicioContent = document.getElementById('inicio-content');
+        const estadisticasContent = document.getElementById('estadisticas-content');
+        const consejosContent = document.getElementById('consejos-content');
+        const reportarContent = document.getElementById('reportar-content');
+        const competenciaContent = document.getElementById('competencia-content'); // New content
+
+        const reportMessage = document.getElementById('report-message');
+        const reportForm = document.getElementById('report-form');
+
+        // AI specific elements
+        const aiConsejoOutput = document.getElementById('ai-consejo-output');
+        const generateAiConsejoButton = document.getElementById('generate-ai-consejo');
+        const consejoSpinner = document.getElementById('consejo-spinner');
+        const aiImpactOutput = document.getElementById('ai-impact-output');
+        const impactSpinner = document.getElementById('impact-spinner');
+
+        // AI Q&A elements
+        const aiQuestionInput = document.getElementById('ai-question-input');
+        const askAiButton = document.getElementById('ask-ai-button');
+        const aiQuestionSpinner = document.getElementById('ai-question-spinner');
+        const aiAnswerOutput = document.getElementById('ai-answer-output');
+
+        // New AI Daily Message elements
+        const aiDailyMessageOutput = document.getElementById('ai-daily-message');
+        const generateAiDailyMessageButton = document.getElementById('generate-ai-daily-message');
+        const dailyMessageSpinner = document.getElementById('daily-message-spinner');
+
+
+        // Function to show a specific tab and hide others
+        function showTab(tabName) {
+            // Hide all content sections
+            inicioContent.classList.add('hidden');
+            estadisticasContent.classList.add('hidden');
+            consejosContent.classList.add('hidden');
+            reportarContent.classList.add('hidden');
+            competenciaContent.classList.add('hidden'); // Hide new content
+
+            // Remove 'active' class from all tab buttons
+            inicioTab.classList.remove('active');
+            estadisticasTab.classList.remove('active');
+            consejosTab.classList.remove('active');
+            reportarTab.classList.remove('active');
+            competenciaTab.classList.remove('active'); // Deactivate new tab
+
+            // Show the selected content section and add 'active' class to its button
+            if (tabName === 'inicio') {
+                inicioContent.classList.remove('hidden');
+                inicioTab.classList.add('active');
+            } else if (tabName === 'estadisticas') {
+                estadisticasContent.classList.remove('hidden');
+                estadisticasTab.classList.add('active');
+            } else if (tabName === 'consejos') {
+                consejosContent.classList.remove('hidden');
+                consejosTab.classList.add('active');
+            } else if (tabName === 'reportar') {
+                reportarContent.classList.remove('hidden');
+                reportarTab.classList.add('active');
+            } else if (tabName === 'competencia') {
+                competenciaContent.classList.remove('hidden');
+                competenciaTab.classList.add('active');
+            }
+        }
+
+        // --- Gemini API Functions ---
+
+        /**
+         * Generates an advanced water-saving tip using the Gemini API.
+         */
+        async function generateAIConsejo() {
+            aiConsejoOutput.innerHTML = ''; // Clear previous content
+            consejoSpinner.classList.remove('hidden'); // Show spinner
+            generateAiConsejoButton.disabled = true; // Disable button
+
+            const prompt = "Genera un consejo conciso y creativo sobre cómo ahorrar agua específicamente en un baño de colegio, dirigido a estudiantes de Innova Schools. El consejo debe ser práctico y fácil de recordar, y no más de 2 oraciones.";
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // API key will be provided by Canvas runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiConsejoOutput.textContent = text;
+                } else {
+                    aiConsejoOutput.textContent = 'No se pudo generar el consejo. Inténtalo de nuevo.';
+                    console.error('Unexpected API response structure:', result);
+                }
+            } catch (error) {
+                aiConsejoOutput.textContent = 'Error al conectar con la IA. Asegúrate de tener conexión.';
+                console.error('Error fetching AI consejo:', error);
+            } finally {
+                consejoSpinner.classList.add('hidden'); // Hide spinner
+                generateAiConsejoButton.disabled = false; // Enable button
+            }
+        }
+
+        /**
+         * Generates an explanation of the environmental impact of a reported issue using the Gemini API.
+         * @param {string} issueDescription - The description of the water waste issue.
+         */
+        async function generateAIImpact(issueDescription) {
+            aiImpactOutput.innerHTML = '<span id="impact-spinner" class="loading-spinner"></span> Calculando impacto...'; // Show spinner and message
+            impactSpinner.classList.remove('hidden'); // Ensure spinner is visible
+
+            const prompt = `Un usuario de Innova Schools reportó el siguiente problema de desperdicio de agua en un baño de colegio: "${issueDescription}". Explica de forma concisa (máximo 2 oraciones) el impacto ambiental que este tipo de problema puede tener y menciona cómo afecta a la comunidad escolar.`;
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // API key will be provided by Canvas runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiImpactOutput.innerHTML = `<strong>Impacto Ambiental ✨:</strong> ${text}`;
+                } else {
+                    aiImpactOutput.textContent = 'No se pudo estimar el impacto. Inténtalo de nuevo.';
+                    console.error('Unexpected API response structure for impact:', result);
+                }
+            } catch (error) {
+                aiImpactOutput.textContent = 'Error al conectar con la IA para el impacto.';
+                console.error('Error fetching AI impact:', error);
+            } finally {
+                impactSpinner.classList.add('hidden'); // Hide spinner
+            }
+        }
+
+        /**
+         * Asks the AI a question about water conservation or AquaGuard project.
+         */
+        async function askAIQuestion() {
+            const question = aiQuestionInput.value.trim();
+            if (!question) {
+                aiAnswerOutput.textContent = 'Por favor, escribe tu pregunta.';
+                return;
+            }
+
+            aiAnswerOutput.innerHTML = ''; // Clear previous answer
+            aiQuestionSpinner.classList.remove('hidden'); // Show spinner
+            askAiButton.disabled = true; // Disable button
+
+            const prompt = `Responde a la siguiente pregunta de un estudiante de Innova Schools sobre ahorro de agua o el proyecto AquaGuard (que usa un ESP32 y sensor YF-201 para monitorear el agua en los baños). Sé conciso y claro. Pregunta: "${question}"`;
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // API key will be provided by Canvas runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiAnswerOutput.textContent = text;
+                } else {
+                    aiAnswerOutput.textContent = 'Lo siento, no pude encontrar una respuesta. Intenta reformular tu pregunta.';
+                    console.error('Unexpected API response structure for AI Q&A:', result);
+                }
+            } catch (error) {
+                aiAnswerOutput.textContent = 'Error al conectar con la IA. Asegúrate de tener conexión.';
+                console.error('Error fetching AI answer:', error);
+            } finally {
+                aiQuestionSpinner.classList.add('hidden'); // Hide spinner
+                askAiButton.disabled = false; // Enable button
+            }
+        }
+
+        /**
+         * Generates a daily inspirational message about water saving.
+         */
+        async function generateAIDailyMessage() {
+            aiDailyMessageOutput.innerHTML = ''; // Clear previous content
+            dailyMessageSpinner.classList.remove('hidden'); // Show spinner
+            generateAiDailyMessageButton.disabled = true; // Disable button
+
+            const prompt = "Genera un mensaje corto, positivo y motivador sobre la importancia de ahorrar agua en un colegio como Innova Schools. Debe ser una frase o dos, inspiradora.";
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = ""; // API key will be provided by Canvas runtime
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiDailyMessageOutput.textContent = text;
+                } else {
+                    aiDailyMessageOutput.textContent = 'No se pudo generar el mensaje. Inténtalo de nuevo.';
+                    console.error('Unexpected API response structure for daily message:', result);
+                }
+            } catch (error) {
+                aiDailyMessageOutput.textContent = 'Error al conectar con la IA para el mensaje diario.';
+                console.error('Error fetching AI daily message:', error);
+            } finally {
+                dailyMessageSpinner.classList.add('hidden'); // Hide spinner
+                generateAiDailyMessageButton.disabled = false; // Enable button
+            }
+        }
+
+
+        // Add event listeners to the tab buttons
+        inicioTab.addEventListener('click', () => showTab('inicio'));
+        estadisticasTab.addEventListener('click', () => showTab('estadisticas'));
+        consejosTab.addEventListener('click', () => showTab('consejos'));
+        reportarTab.addEventListener('click', () => showTab('reportar'));
+        competenciaTab.addEventListener('click', () => showTab('competencia'));
+
+        // Add event listener for generating AI consejo
+        generateAiConsejoButton.addEventListener('click', generateAIConsejo);
+
+        // Add event listener for asking AI a question
+        askAiButton.addEventListener('click', askAIQuestion);
+
+        // Add event listener for generating AI daily message
+        generateAiDailyMessageButton.addEventListener('click', generateAIDailyMessage);
+
+        // Handle report form submission
+        reportForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+            const description = document.getElementById('description').value;
+
+            console.log('Reporte enviado:', {
+                type: document.getElementById('problem-type').value,
+                description: description,
+                location: document.getElementById('location').value,
+                image: document.getElementById('image-upload').files[0] ? document.getElementById('image-upload').files[0].name : 'No image'
+            });
+
+            // Show success message
+            reportMessage.classList.remove('hidden');
+            aiImpactOutput.textContent = ''; // Clear previous impact message
+
+            // Generate AI impact explanation
+            generateAIImpact(description);
+
+            // Optionally, clear the form after submission
+            reportForm.reset();
+
+            // The report message will stay visible until the user navigates away or refreshes.
+            // No setTimeout to hide it, as the impact message is meant to stay.
+        });
+
+
+        // Initialize the app by showing the initial tab on load
+        window.onload = () => {
+            showTab('inicio'); // Show "Inicio" by default
+        };
+    </script>
+</body>
+</html>
